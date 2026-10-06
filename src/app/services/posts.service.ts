@@ -1,19 +1,22 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+interface Post {
+  id: number;
+  userId: number;
+  title: string;
+  body: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class PostService {
-  constructor(private http: HttpClient) {
-    console.log('post service initialized...');
-  }
+  constructor(private readonly http: HttpClient) {}
 
-  getPosts() {
-    return this.http.get('https://jsonplaceholder.typicode.com/posts').pipe(map((res) => res));
+  getPosts(): Observable<Post[]> {
+    return this.http.get<Post[]>('https://jsonplaceholder.typicode.com/posts');
   }
 }
-
-
 

@@ -1,71 +1,6 @@
-import { Component } from '@angular/core';
-import { BaseComponent } from './base.component';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { PostService } from '../services/posts.service';
-
-@Component({
-  selector: 'user',
-  templateUrl: 'user.component.html',
-  styles: [
-    `
-      :host {
-        display: block;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 2rem;
-      }
-
-      h1 {
-        color: #1976d2;
-      }
-    `,
-  ],
-})
-export class UserComponent extends BaseComponent {
-  name!: string;
-  email!: string;
-  address!: Address;
-  hobbies!: string[];
-  showHobbies!: boolean;
-  posts!: Post[];
-
-  constructor(private postService: PostService) {
-    super();
-
-    this.name = 'john doe';
-    this.email = 'john@gmail.com';
-    this.address = {
-      street: 'next street',
-      city: 'my city',
-      state: 'texas',
-    };
-    this.hobbies = ['Movies', 'Sports', 'Travel'];
-    this.showHobbies = false;
-
-    this.postService.getPosts().subscribe({
-      next: (res) => {
-        this.posts = res as Post[];
-        console.log(this.posts);
-      },
-      error: (err) => {
-        console.error('Post fetch error', err);
-      },
-    });
-  }
-
-  toggleHobbies() {
-    this.showHobbies = !this.showHobbies;
-  }
-
-  addHobby(hobby: string) {
-    if (hobby && hobby.trim()) {
-      this.hobbies.push(hobby);
-    }
-  }
-
-  deleteHobby(index: number) {
-    this.hobbies.splice(index, 1);
-  }
-}
 
 interface Address {
   street: string;
@@ -78,4 +13,92 @@ interface Post {
   userId: number;
   title: string;
   body: string;
+}
+
+@Component({
+  selector: 'user',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './user.component.html',
+  styles: `
+    :host {
+      display: block;
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 2rem;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      color: #2563eb;
+    }
+
+    form {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.6rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th,
+    td {
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      text-align: left;
+    }
+  `,
+})
+export class UserComponent {
+  name = 'john doe';
+  email = 'john@gmail.com';
+  address: Address = {
+    street: 'next street',
+    city: 'my city',
+    state: 'texas',
+  };
+  readonly hobbies = ['Movies', 'Sports', 'Travel'];
+  showHobbies = false;
+  newHobby = '';
+  readonly posts = signal<Post[]>([]);
+
+  private readonly postService = inject(PostService);
+
+  constructor() {
+    this.postService.getPosts().subscribe({
+      next: (posts: Post[]) => {
+        this.posts.set(posts);
+      },
+      error: (error: unknown) => {
+        console.error('Post fetch error', error);
+      },
+    });
+  }
+
+  toggleHobbies(): void {
+    this.showHobbies = !this.showHobbies;
+  }
+
+  addHobby(): void {
+    const hobby = this.newHobby.trim();
+
+    if (hobby) {
+      this.hobbies.push(hobby);
+      this.newHobby = '';
+    }
+  }
+
+  deleteHobby(index: number): void {
+    this.hobbies.splice(index, 1);
+  }
 }
