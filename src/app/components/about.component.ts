@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'about',
   template: `
-    <main>
-      <user></user>
-    </main>
+    <h1>This is about page!</h1>
   `,
   styles: [
     `
     `,
   ],
 })
-export class AppComponent {}
+export class AboutComponent {}
